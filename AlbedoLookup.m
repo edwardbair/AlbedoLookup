@@ -1,7 +1,5 @@
 function [broadbandAlbedo, nIRAlbedo, visAlbedo ] = AlbedoLookup(radius,...
     cosineSolarZ,elevation,varargin)
-%broadbandAlbedo = AlbedoLookup(radius,cosineSolarZ,cosineIllum,elevation
-% [,LAPname,LAPconc])
 %
 % Estimates of snow albedos for a mid-latitude winter atmosphere, v1.1
 % This version updates the original code:
@@ -14,8 +12,9 @@ function [broadbandAlbedo, nIRAlbedo, visAlbedo ] = AlbedoLookup(radius,...
 %   examination of snow albedo estimates from MODIS and their impact on
 %   snow water equivalent reconstruction, Water Resources Research
 %
-% Note: Jeff Dozier wrote the original function which is mostly repeadeted
+% Note: Jeff Dozier wrote the original function which is mostly repeated
 % here with a few changes
+%
 %Input values can be of any size and dimension. All must be the same size
 %and dimension, except any can be a scalar.
 %   radius - effective optical radius of the snow grains, micrometers
@@ -32,7 +31,8 @@ function [broadbandAlbedo, nIRAlbedo, visAlbedo ] = AlbedoLookup(radius,...
 %   visAlbedo (0.380 0.750 um)
 %   All of same size and dimension as inputs
 %
-%   Range of lookup table includes radii from 30 to 1800 micrometer grain radius,
+%   Range of lookup table includes radii from 30 to 1800 micrometer 
+%   grain radius,
 %   cosineSolarZ from 0.05 to 1.0 (87 deg to 0 deg),
 %   elevations from 0 to 8 km, dust concentrations from 0 to .001 (1000 ppm),
 %   and soot concentrations from 0 to 5e-5 (50 ppm).
