@@ -12,8 +12,7 @@ function [broadbandAlbedo, nIRAlbedo, visAlbedo ] = AlbedoLookup(radius,...
 %   examination of snow albedo estimates from MODIS and their impact on
 %   snow water equivalent reconstruction, Water Resources Research
 %
-% Note: Jeff Dozier wrote the original function which is mostly repeated
-% here with a few changes
+% Note: Jeff Dozier wrote the original function which is updated here
 %
 %Input values can be of any size and dimension. All must be the same size
 %and dimension, except any can be a scalar.
@@ -24,7 +23,7 @@ function [broadbandAlbedo, nIRAlbedo, visAlbedo ] = AlbedoLookup(radius,...
 %   LAPname - either 'dust' or 'soot'
 %   LAPconc - concentration of light-absorbing particles, as a mass ratio
 %       so therefore dimensionless
-%
+%   fSCA - 0-1, assumes other endmember is shade (0 reflectance)
 %Output
 %   broadbandAlbedo (0.28 to 4 um)
 %   nIRAlbedo (0.8 4 um)
@@ -39,20 +38,20 @@ function [broadbandAlbedo, nIRAlbedo, visAlbedo ] = AlbedoLookup(radius,...
 %   Albedo for values outside a range are set to that of the boundary
 %
 % example usage: [broadbandAlbedo,nIRAlbedo,visAlbedo] = AlbedoLookup(500,...
-%     0.8,3,'dust',200e-6)
+%     0.8,3,'dust',200e-6,'fSCA',0.6)
 
 persistent already S
 
-narginchk(3,7)
+narginchk(3,8)
 nargoutchk(0,3)
-assert(nargin~=4,'both LAPname and LAPconc must be specified, or neither')
 
 %load lookup table
 if isempty(already) || ~already
     already = true;
-    S = load('albedoLUT.mat');
+    S = load('AlbedoLUT.mat');
 end
-    F = S.F;
+    Fdust = S.Fdust;
+    Fsoot = S.Fsoot;
 
 %parse input values
 p = inputParser;
@@ -64,18 +63,22 @@ addOptional(p,'LAPname','',@(x) isempty(x) ||...
     (ischar(x) && (strcmpi(x,'soot') || strcmpi(x,'dust'))))
 addOptional(p,'LAPconc',[],@(x) isempty(x) ||...
     (isnumeric(x) && all(x(:)>=0) && all(x(:)<1)))
+addOptional(p,'fSCAname','',@(x) isempty(x) ||...
+    (ischar(x) && (strcmpi(x,'fsca'))))
+addOptional(p,'fSCAvalue',1,@(x) isempty(x) || ...
+    (isnumeric(x) && all(x(:)>0) &&  all(x(:)<=1)))
 parse(p,radius,cosineSolarZ,elevation,varargin{:})
 
-%dust (1st dim=1) or soot(1st dim=2), or clean
+
 if isempty(p.Results.LAPname)
-    dim1=1; %dust
+    F=Fdust; %use dust
     LAPconc = 0;
 else
     switch lower(p.Results.LAPname)
         case 'dust'
-            dim1=1;
+            F=Fdust;
         case 'soot'
-            dim1=2;
+            F=Fsoot;
         otherwise % shouldn't reach as should be caught by input parser
             error('LAPname %s not recognized',p.Results.LAPname)
     end
@@ -87,15 +90,15 @@ assert(~(isempty(p.Results.cosineSolarZ)),...
     'cosineSolarZ cannot be empty')
 
 %check input sizes
-[radius,cosZ,elevation,LAPconc] =...
-    checkSizes(p.Results.radius,cosineSolarZ,p.Results.elevation,LAPconc);
+[radius,cosZ,elevation,LAPconc,fSCAvalue] =...
+    checkSizes(p.Results.radius,cosineSolarZ,p.Results.elevation,LAPconc,p.Results.fSCAvalue);
 
 %lookup albedo
 %grid vectors are:
-%laptype(1=dust;2=soot),LAPConc,elevation,cosZ,bandPasses(1=broadband;2=nIR;3=vis),grainSize;
+%fSCA,LAPConc,elevation,cosZ,bandPasses(1=broadband;2=nIR;3=vis),grainSize;
 
 for i=1:3
-    A= F(dim1,double(LAPconc),...
+    A= F(double(fSCAvalue),double(LAPconc),...
         double(elevation),double(cosZ),i,double(radius));
     switch i
         case 1
