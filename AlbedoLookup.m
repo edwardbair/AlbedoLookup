@@ -99,7 +99,7 @@ assert(~(isempty(p.Results.cosineSolarZ)),...
 
 for i=1:3
     A= F(double(fSCAvalue),double(LAPconc),...
-        double(elevation),double(cosZ),i,double(radius));
+        double(elevation),double(cosZ),i*ones(size(fSCAvalue)),double(radius));
     switch i
         case 1
             broadbandAlbedo=A;
