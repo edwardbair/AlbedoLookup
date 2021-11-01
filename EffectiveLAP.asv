@@ -29,8 +29,8 @@ Fsoot = S.Fsoot;
 p=inputParser;
 addRequired(p,'deltavis',@(x) isnumeric(x) && (x>=0) && (x<=0.40))
 addRequired(p,'rg',@(x) isnumeric(x) && (x>=30) && (x<=1800))
-addRequired(p,'mu0',@(x) isnumeric(x) && (x>=0) && (x<=1))
-addRequired(p,'Z',@(x) isnumeric(x) && (x>=0) && (x<=8))
+addRequired(p,'mu0',@(x) isnumeric(x) && (x>=0) && x<=1))
+addRequired(p,'Z',@isnumeric && (x>=0) && (x<=8))
 addOptional(p,'LAPname','dust',@(x) isempty(x) ||...
     (ischar(x) && (strcmpi(x,'soot') || strcmpi(x,'dust'))))
 addOptional(p,'LUT',true,@(x) isempty(x) || islogical(x))

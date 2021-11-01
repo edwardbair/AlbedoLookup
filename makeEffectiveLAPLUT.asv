@@ -1,0 +1,37 @@
+
+mu0=linspace(0.05,1,13);
+Z=linspace(0,8,8);
+rg=linspace(0.03,1.8,10)*1e3;
+deltavis=linspace(0,0.4,40);
+
+[w,x,y,z]=ndgrid(deltavis,rg,mu0,Z);
+lap=nan(length(deltavis),length(j),length(k),length(kk));
+
+for ii=1:2
+    switch ii
+        case 1
+            lapname='dust';
+        case 2
+            lapname='soot';
+    end
+    for i=1:length(mu0)
+        for j=1:length(Z)
+            for k=1:length(rg)
+                parfor kk=1:length(deltavis)
+                    lap(i,j,k,kk)=EffectiveLAP(deltavis,rg,mu0,Z,lapname)
+                end
+                fprint('done with %i %i %i\n',i,j,k);
+            end
+        end
+    end
+    F=griddedInterpolant(w,x,y,z,lap,'linear','nearest');
+    switch ii
+        case 1
+            Fdust=F;
+        case 2
+            Fsoot=F;
+    end
+end
+
+
+
